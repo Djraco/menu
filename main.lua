@@ -10,8 +10,11 @@ local PlayerList
 local List
 local PLAYERNAME
 local Search
+local ClickTp
 
 -----Defaults-----
+local ClickTp_Clicked = false
+local HoldingControl = false
 local CLOSED_POS = UDim2.new(0.027, 0, 0.926, 0)
 local MAIN_OPEN = true
 local MAIN_POS = UDim2.new(0.027, 0, 0.388, 0)
@@ -27,9 +30,11 @@ local function setDraggable(p)
 end
 
 function lua()
+	local UserInputService = game:GetService('UserInputService')
 	local Players = game:GetService("Players")
 	local me = game.Players.LocalPlayer
 	local plrs = game.Players:GetChildren()
+	local Mouse = me:GetMouse()
 
 	-----Instances-----
 	Teleporter = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
@@ -41,6 +46,7 @@ function lua()
 	Main = Instance.new("Frame", Teleporter)
 	Close = Instance.new("TextButton", Main)
 	TpPlayer = Instance.new("TextButton", Main)
+	ClickTp = Instance.new("TextButton", Main)
 
 	PlayerList = Instance.new("Frame", Teleporter)
 	List = Instance.new("ScrollingFrame", PlayerList)
@@ -101,11 +107,17 @@ function lua()
 	TpPlayer.Size = UDim2.new(0, 149, 0, 33)
 	TpPlayer.Text = "Player"
 	TpPlayer.MouseButton1Click:Connect(function()
-		if PlayerList.Visible == false then
-			PlayerList.Visible = true
-		else 
-			PlayerList.Visible = false
-		end
+		PlayerList.Visible = not PlayerList.Visible 
+	end)
+	
+	ClickTp.Name = "ClickTp"
+	ClickTp.Position = UDim2.new(0.094, 0, 0.166, 0)
+	ClickTp.Size = UDim2.new(0, 149, 0, 33)
+	ClickTp.Text = "ClickTp"
+	ClickTp.MouseButton1Click:Connect(function()
+		ClickTp.BackgroundColor3 = Color3.new(0.458824, 0.454902, 0.462745)
+		HoldingControl = true
+		ClickTp_Clicked = true
 	end)
 
 	PlayerList.Name = "PlayerList"
@@ -134,7 +146,7 @@ function lua()
 	Search.Size = UDim2.new(0, 136, 0, 25)
 	Search.Text = "Search"
 
-	-----Add players to PlayerList-----
+	-----Teleport Players-----
 	for i,v in pairs(plrs) do
 		local name = tostring(v)
 		if name ~= me.Name then --doesn't add your username
@@ -148,7 +160,38 @@ function lua()
 			label.MouseButton1Click:Connect(function() me.Character:MoveTo(game.Workspace:FindFirstChild(name).HumanoidRootPart.Position)end)
 		end
 	end
-
+	
+	-----Click To Tp-----
+	Mouse.Button1Down:connect(function()
+		if HoldingControl then
+			if ClickTp_Clicked then
+				me.Character:MoveTo(Mouse.Hit.p)
+				ClickTp.BackgroundColor3 = Color3.new(0.639216, 0.635294, 0.647059)
+				HoldingControl = false
+				ClickTp_Clicked = false
+			else
+				me.Character:MoveTo(Mouse.Hit.p)
+			end
+		end
+	end)
+	UserInputService.InputBegan:connect(function(Input, Processed)
+		if Input.UserInputType == Enum.UserInputType.Keyboard then
+			if (Input.KeyCode == Enum.KeyCode.LeftControl) or (Input.KeyCode == Enum.KeyCode.RightControl) then
+				ClickTp.BackgroundColor3 = Color3.new(0.458824, 0.454902, 0.462745)
+				HoldingControl = true
+			end
+		end
+	end) 
+	UserInputService.InputEnded:connect(function(Input, Processed)
+		if Input.UserInputType == Enum.UserInputType.Keyboard then
+			if (Input.KeyCode == Enum.KeyCode.LeftControl) or (Input.KeyCode == Enum.KeyCode.RightControl) then
+				ClickTp.BackgroundColor3 = Color3.new(0.639216, 0.635294, 0.647059)
+				HoldingControl = false
+			end
+		end
+	end)
+	
+	
 	-----Makes GUIs draggable-----
 	for i, v in pairs(Teleporter:GetChildren()) do
 		if (v.Name ~= "1") and (v.Name ~= "2") then
