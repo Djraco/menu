@@ -12,9 +12,12 @@ local PLAYERNAME
 local Search
 
 -----Defaults-----
+local CLOSED_POS = UDim2.new(0.027, 0, 0.926, 0)
 local MAIN_OPEN = true
+local MAIN_POS = UDim2.new(0.027, 0, 0.388, 0)
 local PLAYERLIST_OPEN = false
 local PLAYERLIST_POS = UDim2.new(0.169, 0, 0.415, 0)
+
 
 local function setDraggable(p)
 	local s = Instance.new('LocalScript', p)
@@ -27,8 +30,8 @@ function lua()
 	local Players = game:GetService("Players")
 	local me = game.Players.LocalPlayer
 	local plrs = game.Players:GetChildren()
-	
------Instances-----
+
+	-----Instances-----
 	Teleporter = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
 
 	Closed = Instance.new("Frame", Teleporter)
@@ -44,11 +47,11 @@ function lua()
 	PLAYERNAME = Instance.new("TextButton", List)
 	Search = Instance.new("TextBox", PlayerList)
 
------Properties-----
+	-----Properties-----
 	Teleporter.Name = "Teleporter"
 
 	Closed.Name = "Closed"
-	Closed.Position = UDim2.new(0.027, 0, 0.926, 0)
+	Closed.Position = CLOSED_POS
 	Closed.Size = UDim2.new(0, 184, 0, 13)
 	Closed.Visible = false
 	Closed.BackgroundColor3 = Color3.new(0.737255, 0.737255, 0.737255)
@@ -63,6 +66,7 @@ function lua()
 	Open.MouseButton1Click:Connect(function()
 		Main.Visible = true
 		Closed.Visible = false
+		Main.Position = UDim2.new(Closed.Position.X, Closed.Position.Height)
 	end)
 
 	CloseTitle.Name = "CloseTitle"
@@ -73,7 +77,7 @@ function lua()
 	CloseTitle.BackgroundTransparency = 0.7
 
 	Main.Name = "Main"
-	Main.Position = UDim2.new(0.027, 0, 0.388, 0)
+	Main.Position = MAIN_POS
 	Main.Size = UDim2.new(0, 184, 0, 350)
 	Main.BackgroundColor3 = Color3.new(0.737255, 0.737255, 0.737255)
 	Main.BackgroundTransparency = 0.7
@@ -89,7 +93,7 @@ function lua()
 	Close.MouseButton1Click:Connect(function()
 		Main.Visible = false
 		Closed.Visible = true
-		Closed.Position = UDim2.new(Main.Position.X, Main.Position.Height+Main.Position.Height) --0.509
+		Closed.Position = UDim2.new(Main.Position.X, Main.Position.Height) --0.509
 	end)
 
 	TpPlayer.Name = "TpPlayer"
@@ -129,8 +133,8 @@ function lua()
 	Search.Position = UDim2.new(0.058, 0, 0.019, 0)
 	Search.Size = UDim2.new(0, 136, 0, 25)
 	Search.Text = "Search"
-	
------Add players to PlayerList-----
+
+	-----Add players to PlayerList-----
 	for i,v in pairs(plrs) do
 		local name = tostring(v)
 		if name ~= me.Name then --doesn't add your username
@@ -144,10 +148,10 @@ function lua()
 			label.MouseButton1Click:Connect(function() me.Character:MoveTo(game.Workspace:FindFirstChild(name).HumanoidRootPart.Position)end)
 		end
 	end
-	
------Makes GUIs draggable-----
+
+	-----Makes GUIs draggable-----
 	for i, v in pairs(Teleporter:GetChildren()) do
-		if (v.Name ~= "penis") and (v.Name ~= "Closed") then
+		if (v.Name ~= "1") and (v.Name ~= "2") then
 			coroutine.wrap(setDraggable)(Teleporter:FindFirstChild(v.Name))
 		end
 	end
@@ -158,11 +162,13 @@ end
 while true do
 	lua()
 	wait(10)
+	CLOSED_POS = Closed.Position
 	MAIN_OPEN = Main.Visible
+	MAIN_POS = Main.Position
 	PLAYERLIST_OPEN = PlayerList.Visible
 	PLAYERLIST_POS = PlayerList.Position
 	Teleporter:Destroy()
-	
+
 	print("refreshed")
 end
 
